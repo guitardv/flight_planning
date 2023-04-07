@@ -23,6 +23,6 @@ Use of the FAA NOTAM API is subject to registration and manual approval by the F
 
 ## Print :
 Printer : Adafruit product #597 "Mini Thermal Receipt Printer" (Zijiang ZJ-58 thermal printer).<br>
-The printer is connected to a Raspberry Pi accessed via SSH. Both the client machine and the RPi have a clone of this repo.<br>
+The printer is connected to a Raspberry Pi remotely accessed via SSH. Both the client machine and the RPi have a clone of this repo.<br>
 Adafruit_Thermal python library provided by Adafruit and used under MIT license, for more information on the library see: https://github.com/adafruit/Python-Thermal-Printer .<br>
 For more information on the printer, see: https://www.adafruit.com/product/597 .
