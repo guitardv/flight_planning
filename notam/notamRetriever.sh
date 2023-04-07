@@ -146,7 +146,7 @@ else
     client_id=$(cat "$SCRIPT_DIR/SECRET/api_client_id")
     client_secret=$(cat "$SCRIPT_DIR/SECRET/api_client_secret")
     airportList=${airportList^^} # make all ICAO ids uppercase
-    airportList=($airportList) #convert the string into an array using spaces as separators # I decided to do that directelly in the for bellow
+    airportList=($airportList) #convert the string into an array using spaces as separators
     for currentICAOlocation in ${airportList[@]} ; do
         echo
         echo "Downloading NOTAMs for $currentICAOlocation:"
