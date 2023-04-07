@@ -3,6 +3,7 @@ A collection of scripts to retrieve and collate informations relevant to flight 
 
 ## Disclaimer :
 **For educational purposes only.**<br>
+Please, read this file and the *LICENSE* file.<br>
 /!\ **Warning**: Do not use as your sole source of information to prepare an actual flight, please **follow relevant laws and regulations**.<br>
 /!\ **Warning**: The software is provided "as is" without any warranty, express or implied. It is your responsibility to cross-check all information that may be supplied by the software for pertinence, completeness, and accuracy.<br>
 /!\ **Warning**: By using this software, you acknowledge that **your use of this software is at your sole risk**.<br>
