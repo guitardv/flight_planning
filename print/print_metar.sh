@@ -10,3 +10,4 @@ if [ $# -gt 0 ] ; then
 else
     python3 "$SCRIPT_DIR/../metar/metar.py" | python3 "$SCRIPT_DIR/print_metar.py"
 fi
+
