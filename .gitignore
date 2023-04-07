@@ -1,0 +1,6 @@
+*.log
+*.tmp
+SECRET/
+SECRETS/
+print/__pycache__/
+notam/example/
