@@ -2,5 +2,5 @@
 *.tmp
 SECRET/
 SECRETS/
-print/__pycache__/
+print*/__pycache__/
 notam/example/
