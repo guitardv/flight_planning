@@ -150,7 +150,7 @@ MainMenu()
         1) $SCRIPT_DIR/metar/metar.sh --interactive ; MainMenu ;;
         2) $SCRIPT_DIR/notam/notamRetriever.sh --interactive ; MainMenu ;;
         q | Q) echo ; exit 0 ;;
-        *) tput setaf $warningMessage ; echo "Unrecognised option" ; tput sgr0 ; MainMenu 1 1 ;;
+        *) tput setaf $warningMessage ; echo ; echo "Unrecognised option" ; tput sgr0 ; MainMenu 1 1 ;;
     esac
 }
 
