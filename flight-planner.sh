@@ -35,6 +35,7 @@ Grey248=248
 Grey=244
 DarkGrey=236
 DynamiteRed=9
+StandardYellow=3
 
 # tput setaf <int> changes font color
 # tput colors return the number of supported colors (8 or 256)
@@ -47,8 +48,9 @@ if [ $(tput colors) -eq 256 ] ; then
     menuTitleColor=$PureWhite
     menuLabelColor=$ExtraLightGrey
     menuItemColor=$ExtraLightGrey
+    menuItemNumberColor=$StandardYellow
     menuQueryColor=$ExtraLightGrey
-    menuChoiceColor=$PureWhite
+    menuChoiceColor=$menuItemNumberColor
     menuBorderColor=$Grey248
     warningMessage=$DynamiteRed
 else
@@ -58,8 +60,9 @@ else
     menuTitleColor=7
     menuLabelColor=9
     menuItemColor=9
+    menuItemNumberColor=$StandardYellow # yellow
     menuQueryColor=9
-    menuChoiceColor=7
+    menuChoiceColor=$menuItemNumberColor
     menuBorderColor=9
     warningMessage=1 # red
 fi
@@ -105,55 +108,106 @@ EOF
 
 MainMenu()
 {
-    dontClear=${1:-0}
-    dontPrintLogo=${2:-0}
+    dontClear=0
+    dontPrintLogo=0
 
-    if [ $dontClear -eq 0 ] ; then clear ; fi
-    if [ $dontPrintLogo -eq 0 ] ; then
-        echo
-        MainLogo
-    fi
+    while [ 1 -eq 1 ] ; do
 
-    # generate a "prefix" indentation to have the menu centered in the terminal
-    menuWidth=79
-    COLUMNS=$(tput cols)
-    indent=$(( (COLUMNS - menuWidth) / 2 ))
-    choiceIndent=$(( indent / 2 ))
-    prefix=''
-    choicePrefix=''
-    for ((i=1; i<=indent; i++)) ; do
-        prefix+=' '
-        if [ $i -le $choiceIndent ] ; then
-            choicePrefix+=' '
+        if [ $dontClear -eq 0 ] ; then
+            clear
+        else
+            dontClear=0
         fi
+        if [ $dontPrintLogo -eq 0 ] ; then
+            echo
+            MainLogo
+        else
+            dontPrintLogo=0
+        fi
+
+        # generate a "prefix" indentation to have the menu centered in the terminal
+        menuWidth=79
+        COLUMNS=$(tput cols)
+        indent=$(( (COLUMNS - menuWidth) / 2 ))
+        choiceIndent=$(( indent / 2 ))
+        prefix=''
+        choicePrefix=''
+        for ((i=1; i<=indent; i++)) ; do
+            prefix+=' '
+            if [ $i -le $choiceIndent ] ; then
+                choicePrefix+=' '
+            fi
+        done
+
+        echo
+        echo
+        echo "$(tput setaf $menuBorderColor)$prefix+-----------------------------------------------------------------------------+"
+        echo "$prefix!$(tput setaf $menuTitleColor)                                  Main Menu                                  $(tput setaf $menuBorderColor)!"
+        echo "$prefix+-----+----------+------------------------------------------------------------+"
+        echo "$prefix!$(tput setaf $menuLabelColor) Nbr $(tput setaf $menuBorderColor)!$(tput setaf $menuLabelColor) Choice $(tput setaf $menuBorderColor)  !$(tput setaf $menuLabelColor) Detail   $(tput setaf $menuBorderColor)                                                  !"
+        echo "$prefix+-----+----------+------------------------------------------------------------+"
+        echo "$prefix!$(tput setaf $menuItemNumberColor)  1  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) METAR    $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Retrieve METeorological Aerodrome Reports by location      $(tput setaf $menuBorderColor)!"
+        echo "$prefix+-----+----------+------------------------------------------------------------+"
+        echo "$prefix!$(tput setaf $menuItemNumberColor)  2  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) NOTAM   $(tput setaf $menuBorderColor) !$(tput setaf $menuItemColor) Retrieve NOtice(s) to AirMen by location                   $(tput setaf $menuBorderColor)!"
+        echo "$prefix+-----+----------+------------------------------------------------------------+"
+        echo "$prefix!$(tput setaf $menuItemNumberColor)  q  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit     $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit to terminal                                           $(tput setaf $menuBorderColor)!"
+        echo "$prefix+-----+----------+------------------------------------------------------------+"
+        echo
+        printf "$(tput setaf $menuQueryColor)$choicePrefix""Choice number: "
+        tput setaf $menuChoiceColor
+        read menuChoice
+        tput sgr0
+
+        case $menuChoice in
+            1) SendToMetar ;;
+            2) SendToNotam ;;
+            q | Q) echo ; exit 0 ;;
+            *) tput setaf $warningMessage ; echo ; echo "$choicePrefix""Unrecognised option" ; tput sgr0 ; dontClear=1 ; dontPrintLogo=1 ;;
+        esac
     done
-
-    echo
-    echo
-    echo "$(tput setaf $menuBorderColor)$prefix+-----------------------------------------------------------------------------+"
-    echo "$prefix!$(tput setaf $menuTitleColor)                                  Main Menu $(tput setaf $menuBorderColor)                                 !"
-    echo "$prefix+-----+----------+------------------------------------------------------------+"
-    echo "$prefix!$(tput setaf $menuLabelColor) Nbr$(tput setaf $menuBorderColor) !$(tput setaf $menuLabelColor) Choice $(tput setaf $menuBorderColor)  !$(tput setaf $menuLabelColor) Detail   $(tput setaf $menuBorderColor)                                                  !"
-    echo "$prefix+-----+----------+------------------------------------------------------------+"
-    echo "$prefix!$(tput setaf $menuItemColor)  1  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) METAR    $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Retrieve METeorological Aerodrome Reports by location      $(tput setaf $menuBorderColor)!"
-    echo "$prefix+-----+----------+------------------------------------------------------------+"
-    echo "$prefix!$(tput setaf $menuItemColor)  2  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) NOTAM   $(tput setaf $menuBorderColor) !$(tput setaf $menuItemColor) Retrieve NOtice(s) to AirMen by location                   $(tput setaf $menuBorderColor)!"
-    echo "$prefix+-----+----------+------------------------------------------------------------+"
-    echo "$prefix!$(tput setaf $menuItemColor)  q  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit     $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit to terminal                                           $(tput setaf $menuBorderColor)!"
-    echo "$prefix+-----+----------+------------------------------------------------------------+"
-    echo
-    printf "$(tput setaf $menuQueryColor)$choicePrefix""Choice number: "
-    tput setaf $menuChoiceColor
-    read menuChoice
-    tput sgr0
-
-    case $menuChoice in
-        1) $SCRIPT_DIR/metar/metar.sh --interactive ; MainMenu ;;
-        2) $SCRIPT_DIR/notam/notamRetriever.sh --interactive ; MainMenu ;;
-        q | Q) echo ; exit 0 ;;
-        *) tput setaf $warningMessage ; echo ; echo "Unrecognised option" ; tput sgr0 ; MainMenu 1 1 ;;
-    esac
 }
+
+SendToMetar()
+{
+    clear
+    MainLogo
+    $SCRIPT_DIR/metar/metar.sh --interactive
+
+    if [ -a $SCRIPT_DIR/metar/.quit ] ; then
+        rm $SCRIPT_DIR/metar/.quit
+        exit 0
+    fi
+}
+
+SendToNotam()
+{
+    clear
+    MainLogo
+    $SCRIPT_DIR/notam/notamRetriever.sh --interactive
+
+    if [ -a $SCRIPT_DIR/notam/.quit ] ; then
+        rm $SCRIPT_DIR/notam/.quit
+        exit 0
+    fi
+}
+
+TempFileClearing()
+{
+    tput setaf $warningMessage
+    echo
+    echo "$choicePrefix""The application wasn't cleanly closed."
+    echo "Clearing temporary files . . ."
+    tput sgr0
+    rm "$1"
+    sleep 2
+}
+
+if [ -a $SCRIPT_DIR/metar/.quit ] ; then
+    TempFileClearing "$SCRIPT_DIR/metar/.quit"
+fi
+if [ -a $SCRIPT_DIR/notam/.quit ] ; then
+    TempFileClearing "$SCRIPT_DIR/notam/.quit"
+fi
 
 MainMenu
 

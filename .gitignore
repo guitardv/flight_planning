@@ -1,5 +1,6 @@
 *.log
 *.tmp
+.quit
 SECRET/
 SECRETS/
 print*/__pycache__/
