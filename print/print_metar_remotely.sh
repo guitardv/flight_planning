@@ -20,11 +20,11 @@
 #       https://github.com/guitardv/flight_planning/blob/main/README.md
 ##############################################################################
 
-# This script relay its arguments to the print_metar.sh on my raspberry pi
-# I gave this script the alias metarp in my .bash_aliases
+# This script relay its arguments to the print_metar.sh on the raspberry pi
+# I suggest you give this script the alias metarp in your .bash_aliases, for ease of use
 # The RPi ip is stored in printer/SECRET/printer_ip
 # The RPi user id is stored in printer/SECRET/user_id
-# The path to the flight_planning repo on my RPi is stored in printer/SECRET/repo_path
+# The path to the flight_planning repo on the RPi is stored in printer/SECRET/repo_path
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 Printer_ip=$( cat "$SCRIPT_DIR/SECRET/printer_ip" )
