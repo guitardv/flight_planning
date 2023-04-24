@@ -3,5 +3,5 @@
 .quit
 SECRET/
 SECRETS/
-print*/__pycache__/
+__pycache__/
 notam/example/
