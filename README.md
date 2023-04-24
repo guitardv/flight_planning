@@ -5,22 +5,115 @@ The end goal is to develop a modular flight planning environnment.<br>
 This project is still in its early developpement stages, expect it to be riddled with issues and vulnerabilities.<br>
 Since I'm working on it alone and on my spare time, don't expect any kind of consistent schedule. Part of my motivation for this project is to practice programming, so expect weird stuff like a (needlessly) large number of languages.<br><br>
 The intended use of this Work is educational, **DO NOT USE TO PREPARE AN ACTUAL FLIGHT**.<br>
-While I'm aiming at making it a reliable source of aeronotical informations by taking steps such as only using official primary sources, the Work is still very much the work of an amateur and should be treated as such.<br>
-<br>/!\ **Warning**: Do not use as Your sole or primary source of information to prepare an actual flight, please **follow relevant laws and regulations**.<br><br>
+While I'm aiming at making it a reliable source of aeronotical informations by taking steps such as only using official primary sources, the Work is still very much the work of an amateur and should be treated as such.<br><br>
 Please, read this file and the *LICENSE* file provided in the same folder before using this Work.
+
+## Installation and Setup
+
+This software is optimised for use with AMD64 (x86-64) *KDE* **Ubuntu 22.10** and the ARMv7 *Lite* version of **Raspbian GNU/Linux 11** runing an headless user in a restricted shell on startup and an administrator account accessed remotelly via SSH.<br>
+If you're using linux, you can check your system version and CPU architecture with the commands:
+
+```bash
+    # System version:
+    cat /etc/os-release | grep "PRETTY_NAME"
+
+    # CPU architecture:
+    lscpu | grep "Architecture"
+``` 
+<br>
+
+### To install the software:
+
+1. Download the latest version of the flight_planning repository
+    - Either go to <https://github.com/guitardv/flight_planning>, download the code as an archive, and unzip it in its desired working directory;
+    - Or clone the repository using Git:
+        1. Make sure Git is installed and up to date with the command `git -v`. If git is installed, its version should be printed on the terminal. If git is reported as an unknown command, you can install it with `apt install git` or its equivalent command for your linux distribution. For more details about git, or to check its latest version number, see <https://git-scm.com/>.
+        2. Clone the flight_planning repository:
+            ```bash
+            git clone git@github.com:guitardv/flight_planning.git
+            ```
+2. Install Python3 dependencies
+    1. Python3 is required for this project. Make sure python is installed and up to date with the command `python --version`. You can install the latest version of python with the command `apt install python` or its equivalent for your linux distribution. For more details about python, or to check its latest version number, see: <https://www.python.org/>.
+    2. To use pip to install the required python dependencies, start by making sure that pip is installed and up to date with the command `pip --version`. You can install the latest version of pip with the command `apt install python3-pip` or its equivalent for your linux distribution. If pip is already installed, you can update it to its latest version with the command `python3 -m pip install --upgrade pip`. For more details about pip, or to check its latest version number, see: <https://pip.pypa.io/en/stable/>.
+    3. Install the python3 required dependencies listed in the *requirements.txt* file in the repository root directory (named "*flight_planning*" by default).
+        ```bash
+        pip install -r requirements.txt
+        ```
+
+### Setup:
+
+At the moment, only the **NOTAM** and the **Print** modules requires some setting up. See their respective section in the "Overview of the modules" chapter bellow.
 
 ## Overview of the modules
 You'll find bellow an overview of the modules currently integrated/in developpment.
 
-### METAR :
+### METAR
 Works only for Canadian airports.<br>
 Weather data provided by Environment Canada and NAV CANADA via <https://flightplanning.navcanada.ca>.
 
-### NOTAM :
+### NOTAM
 NOTAMs provided by the FAA NOTAM API.<br>
-Use of the FAA NOTAM API is subject to registration and manual approval by the FAA, for more information see : <https://api.faa.gov>.
+Use of the FAA NOTAM API is subject to registration and manual approval by the FAA, for more information see : <https://api.faa.gov>.<br>
 
-### Print :
+#### Initial setup
+Once you have obtained a valid API client ID and key for the FAA NOTAM API, create the subfolder "SECRET" in the module folder "notam". Then, in the "SECRET" subfolder, create the files *api_client_id*, containing your API client ID, and *api_client_secret*, containing your API key. **These files must not contain any superfluous character, including any spaces or empty lines.**<br>
+
+Exemple:
+
+```bash
+# Replace <API client ID> and <API key> with their respective value
+mkdir notam/SECRET
+echo "<API client ID>" > notam/SECRET/api_client_id
+echo "<API key>" > notam/SECRET/api_client_secret
+```
+
+#### Usage
+
+Using the argument `-h` or `--help` will show the usage.
+
+```bash
+./notam/notamRetriever.sh -h
+```
+
+<blockquote><pre><span style="white-space: pre;"><samp>
+Retreive NOTAMs for specified locations from the NOTAM FAA API and format them for human readability.<br>
+
+Usage:
+ notamRetriever.sh [options]
+ notamRetriever.sh [options] -o|--output \<file>
+
+Options:
+-t, --test            use local raw NOTAM data if available
+-a, --airport \<ICAO>  retreive NOTAMs associated to specified ICAO
+                      locations, if multiple locations are provided
+                      use quotation marks and separate locations
+                      with a space, eg.: "CYHU CYUL"
+                      default value: "CYHU CSY3"
+-o, --output \<file>   generated human readable NOTAMS will be saved
+                      in the specified file,
+                      default value: notam.txt
+-h, --help            display this help message and exit
+
+API Key:
+Usage of the NOTAM FAA API requires the use of a client id and of a
+client key. The client id and client key should be stored in the
+subfolder "SECRET" under the name "api_client_id" and
+"api_client_secret", respectively and without any extra character.
+To obtain an API key or for more information about the FAA NOTAM API,
+see: https://api.faa.gov .
+
+Test:
+If the option -t or --test is used, raw NOTAM data will be imported
+from files in the "example" subfolder, if available, instead of being
+downloaded. Example files names should start with the ICAO location
+id (uppercase) and end with an extansion corresponding to their format
+(.geoJSON or .aixm).
+Eg.: ./example/CYHU.geoJSON or ./example/KRSW_20230406.aixm
+/!\ The only format supported for now is geoJSON.
+</samp></span></pre></blockquote>
+
+### Print
+
 Printer : Adafruit product #597 "Mini Thermal Receipt Printer" (Zijiang ZJ-58 thermal printer).<br>
 The printer is connected to a Raspberry Pi remotely accessed via SSH. Both the client machine and the RPi have a clone of this repo.<br>
 Adafruit_Thermal python library provided by Adafruit and used under MIT license, for more information on the library see: <https://github.com/adafruit/Python-Thermal-Printer>.<br>

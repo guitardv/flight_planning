@@ -3,5 +3,6 @@
 .quit
 SECRET/
 SECRETS/
+RetiredFiles/
 __pycache__/
 notam/example/
