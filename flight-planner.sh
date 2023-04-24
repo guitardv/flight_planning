@@ -37,7 +37,8 @@ DarkGrey=236
 DynamiteRed=9
 
 # tput setaf <int> changes font color
-# tput colors return the number of supported colors (9 or 256)
+# tput colors return the number of supported colors (8 or 256)
+# if 8: 0 to 7 are colors, 8 isn't attributed, and 9 is default
 # tput sgr0 reset the terminal to its default configuration
 if [ $(tput colors) -eq 256 ] ; then
     logoColor=$SkyBlue
