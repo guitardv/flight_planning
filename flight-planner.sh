@@ -111,7 +111,7 @@ MainMenu()
     dontClear=0
     dontPrintLogo=0
 
-    while [ 1 -eq 1 ] ; do
+    while : ; do
 
         if [ $dontClear -eq 0 ] ; then
             clear
