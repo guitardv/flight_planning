@@ -109,6 +109,13 @@ for ((i=1; i<=menuIndent; i++)) ; do
     fi
 done
 
+# To determine if the terminal width is sufficient minWindowWidth is defined as the larger value between banner_width and menuWidth
+if [ $banner_width -lt $menuWidth ] ; then
+    minWindowWidth=$menuWidth
+else
+    minWindowWidth=$banner_width
+fi
+
 MainLogo()
 {
 
@@ -157,6 +164,29 @@ MainMenu()
             RecalculateWindowSize
         fi
 
+        # If the terminal width is too small, print a warning message
+        if [ $COLUMNS -lt $minWindowWidth ] && [ ! -f "$SCRIPT_DIR/.conf.d/noSmallWindowWarning" ] ; then
+            if [ ! -f "$SCRIPT_DIR/.conf.d/noSmallWindowWarning" ] ; then echo "No config" ; fi ###
+            tput setaf $warningMessage
+            echo
+            echo "$choicePrefix""It seems that you are running this software in a small window."
+            echo "$choicePrefix""Your current window width is $COLUMNS columns. For your convenience, a minimum width of $minWindowWidth columns is advised."
+            tput sgr0
+            echo
+            printf "$choicePrefix""If you wish to permanently disable this warning, press Y. Else, press Enter to continue. "
+            read -n 1 warningChoice
+            echo
+            if [ "$warningChoice" == "y" ] || [ "$warningChoice" == "Y" ] ; then
+                if [ ! -d "$SCRIPT_DIR/.conf.d" ] ; then
+                    mkdir "$SCRIPT_DIR/.conf.d"
+                fi
+                touch "$SCRIPT_DIR/.conf.d/noSmallWindowWarning"
+                echo "$choicePrefix""This warning won't be displayed anymore. You can restore it using the configuration utility."
+            else
+                echo "$choicePrefix""Proceeding to main menu."
+            fi
+        fi
+
         echo
         echo
         echo "$(tput setaf $menuBorderColor)$menuPrefix+-----------------------------------------------------------------------------+"
@@ -194,8 +224,8 @@ SendToMetar()
     MainLogo
     $SCRIPT_DIR/metar/metar.sh --interactive
 
-    if [ -a $SCRIPT_DIR/metar/.quit ] ; then
-        rm $SCRIPT_DIR/metar/.quit
+    if [ -f "$SCRIPT_DIR/metar/.quit" ] ; then
+        rm "$SCRIPT_DIR/metar/.quit"
         exit 0
     fi
 }
@@ -206,8 +236,8 @@ SendToNotam()
     MainLogo
     $SCRIPT_DIR/notam/notamRetriever.sh --interactive
 
-    if [ -a $SCRIPT_DIR/notam/.quit ] ; then
-        rm $SCRIPT_DIR/notam/.quit
+    if [ -f "$SCRIPT_DIR/notam/.quit" ] ; then
+        rm "$SCRIPT_DIR/notam/.quit"
         exit 0
     fi
 }
@@ -418,6 +448,31 @@ MainConfig()
         echo "$choicePrefix""Done"
     fi
 
+    # User config
+    if [ -d "$SCRIPT_DIR/.conf.d" ] && [ "$(ls -A $SCRIPT_DIR/.conf.d)" ] ; then
+        echo
+        echo "$choicePrefix""User configuration files detected in $SCRIPT_DIR/.conf.d"
+        tput setaf $menuQueryColor
+        printf "$choicePrefix""Do you wish to clear user configurations and return the software to its default settings (FAA NOTAM API and remote printer SSH informations won't be affected) ? (y/N) "
+        tput setaf $menuChoiceColor
+        read resetConfigToDefault
+        tput sgr0
+        echo
+        if [ "$resetConfigToDefault" == "y" ] || [ "$resetConfigToDefault" == "Y" ] ; then
+            rm $SCRIPT_DIR/.conf.d/*
+            echo "$choicePrefix""Done"
+        elif [ "$resetConfigToDefault" == "n" ] || [ "$resetConfigToDefault" == "N" ] || [ "$resetConfigToDefault" == "" ] ; then
+            echo "Ignoring user settings."
+        else
+            tput setaf $warningMessage
+            echo "$choicePrefix""Unexpected error."
+            echo "$choicePrefix""ERROR: Unable to handle choice: $resetConfigToDefault"
+            tput sgr0
+            echo
+            exit 1
+        fi
+    fi
+
     echo
     echo "$choicePrefix""Configuration complete, you can now use the software."
     echo "$choicePrefix""If you wish to change the configurations, you can run the command \"$(basename $0) --config\" to come back to this utility."
@@ -437,15 +492,15 @@ TempFileClearing()
 }
 
 # Check if the script is run for the first time by checking if the SECRET subfolder has been created in the notam module folder
-if [ ! -d $SCRIPT_DIR/notam/SECRET ] ; then
+if [ ! -d "$SCRIPT_DIR/notam/SECRET" ] ; then
     MainConfig --initial
 fi
 
 # Check the presence of temp files
-if [ -a $SCRIPT_DIR/metar/.quit ] ; then
+if [ -f "$SCRIPT_DIR/metar/.quit" ] ; then
     TempFileClearing "$SCRIPT_DIR/metar/.quit"
 fi
-if [ -a $SCRIPT_DIR/notam/.quit ] ; then
+if [ -f "$SCRIPT_DIR/notam/.quit" ] ; then
     TempFileClearing "$SCRIPT_DIR/notam/.quit"
 fi
 

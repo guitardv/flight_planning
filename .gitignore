@@ -4,5 +4,6 @@
 SECRET/
 SECRETS/
 RetiredFiles/
+.conf.d/
 __pycache__/
 notam/example/
