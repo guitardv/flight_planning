@@ -42,7 +42,12 @@ If you're using linux, you can check your system version and CPU architecture wi
 
 ### Setup:
 
-At the moment, only the **NOTAM** and the **Print** modules requires some setting up. See their respective section in the "Overview of the modules" chapter bellow.
+The first time you run `flight-planner.sh`, the configuration utility will start and walk you through the configuration of all the modules. If you wish to access the configuration utility later, use the option `--config`.
+```bash
+./flight-planner.sh --config
+```
+
+At the moment, only the **NOTAM** and the **Print** modules requires some setting up. See their respective section in the "Overview of the modules" chapter bellow for informations on how to configure them manually.
 
 ## Overview of the modules
 You'll find bellow an overview of the modules currently integrated/in developpment.
@@ -55,7 +60,7 @@ Weather data provided by Environment Canada and NAV CANADA via <https://flightpl
 NOTAMs provided by the FAA NOTAM API.<br />
 Use of the FAA NOTAM API is subject to registration and manual approval by the FAA, for more information see : <https://api.faa.gov>.<br />
 
-#### Initial setup
+#### Manual setup
 Once you have obtained a valid API client ID and key for the FAA NOTAM API, create the subfolder "SECRET" in the module folder "notam". Then, in the "SECRET" subfolder, create the files *api_client_id*, containing your API client ID, and *api_client_secret*, containing your API key. **These files must not contain any superfluous character, including any spaces or empty lines.**<br />
 
 Exemple:
@@ -121,7 +126,7 @@ The printer is connected to a Raspberry Pi remotely accessed via SSH. Both the c
 Adafruit_Thermal python library provided by Adafruit and used under MIT license, for more information on the library see: <https://github.com/adafruit/Python-Thermal-Printer>.<br />
 For more information on the printer, see: <https://www.adafruit.com/product/597>.
 
-#### Initial setup
+#### Manual setup
 To be able to print the retrieved information without running the software on a SSH, you'll need create the subfolder "SECRET" in the "print" module folder, then create in that subfolder the files *printer_ip*, *user_id*, and *repo_path*, containing respectively the RPi IP, the name of the account on the RPi that will be used to print the retrieved information, and the path to the root folder of the flight_planning repo on the RPi. The module use SSH to send the printing command to the RPi, so you should provide an IP address and account name that can be reached via SSH from the shell you use to run the software. **These files must not contain any superfluous character, including any spaces or empty lines.**<br />
 
 Exemple:

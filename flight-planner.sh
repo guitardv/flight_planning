@@ -21,9 +21,14 @@
 #       https://github.com/guitardv/flight_planning/blob/main/README.md
 ##############################################################################
 
+########
+# Variable declaration
+########
 
-
+# Working directory
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+## COLORS
 
 # tput colors
 FluorGreen=46
@@ -67,40 +72,62 @@ else
     warningMessage=1 # red
 fi
 
+## generate prefixes to center logos and menu in the terminal
+
+# Width of the terminal
+COLUMNS=$(tput cols)
+ColumnsUsedForCalcul="$COLUMNS" #that one is a fixed value and will be used to check if the window size changed
+
+# logo
+banner_width=79
+logoIndent=$(( (COLUMNS - banner_width) / 2 ))
+borderIndent=$(( logoIndent / 2 ))
+borderLength=$(( COLUMNS - logoIndent ))
+borderLine=''
+logoPrefix=''
+for ((i=1; i<=logoIndent; i++)) ; do
+    logoPrefix+=' '
+    if [ $i -le $borderIndent ] ; then
+        borderLine+=' '
+    fi
+done
+
+for ((i=1; i<=borderLength; i++)) ; do
+    borderLine+='='
+done
+
+# menu
+menuWidth=79
+menuIndent=$(( (COLUMNS - menuWidth) / 2 ))
+choiceIndent=$(( menuIndent / 2 ))
+menuPrefix=''
+choicePrefix=''
+for ((i=1; i<=menuIndent; i++)) ; do
+    menuPrefix+=' '
+    if [ $i -le $choiceIndent ] ; then
+        choicePrefix+=' '
+    fi
+done
+
 MainLogo()
 {
 
-    # generate a "prefix" indentation to have the logo centered in the terminal
-    banner_width=79
-    COLUMNS=$(tput cols)
-    indent=$(( (COLUMNS - banner_width) / 2 ))
-    borderIndent=$(( indent / 2 ))
-    borderLength=$(( COLUMNS - indent ))
-    borderLine=''
-    prefix=''
-    for ((i=1; i<=indent; i++)) ; do
-        prefix+=' '
-        if [ $i -le $borderIndent ] ; then
-            borderLine+=' '
-        fi
-    done
-
-    for ((i=1; i<=borderLength; i++)) ; do
-        borderLine+='='
-    done
-
+    # If the size of the terminal changed, recalculate the position of the logo and menu
+    if [ "$ColumnsUsedForCalcul" != "$COLUMNS" ] ; then
+        RecalculateWindowSize
+    fi
 
     # ASCII text generated with: https://patorjk.com/software/taag/#p=display&h=1&v=0&f=Slant&t=Flight%20Planner
     # Font: Slant, Character width: Fitted, Character Height: Full
     cat << EOF
 $(tput setaf $borderColor)$borderLine$(tput setaf $logoColor)
-$prefix    ______ __ _         __     __     ____   __                                
-$prefix   / ____// /(_)____ _ / /_   / /_   / __ \ / /____ _ ____   ____   ___   _____
-$prefix  / /_   / // // __ \`// __ \ / __/  / /_/ // // __ \`// __ \ / __ \ / _ \ / ___/
-$prefix / __/  / // // /_/ // / / // /_   / ____// // /_/ // / / // / / //  __// /    
-$prefix/_/    /_//_/ \__, //_/ /_/ \__/  /_/    /_/ \__,_//_/ /_//_/ /_/ \___//_/     
-$prefix             /____/                                                            
-$prefix $(tput setaf $copyrightColor)                   by Vincent Guitard
+$logoPrefix    ______ __ _         __     __     ____   __                                
+$logoPrefix   / ____// /(_)____ _ / /_   / /_   / __ \ / /____ _ ____   ____   ___   _____
+$logoPrefix  / /_   / // // __ \`// __ \ / __/  / /_/ // // __ \`// __ \ / __ \ / _ \ / ___/
+$logoPrefix / __/  / // // /_/ // / / // /_   / ____// // /_/ // / / // / / //  __// /    
+$logoPrefix/_/    /_//_/ \__, //_/ /_/ \__/  /_/    /_/ \__,_//_/ /_//_/ /_/ \___//_/     
+$logoPrefix             /____/                                                            
+$logoPrefix $(tput setaf $copyrightColor)                   by Vincent Guitard
 
 $(tput setaf $borderColor)$borderLine$(tput sgr0)
 EOF
@@ -125,33 +152,24 @@ MainMenu()
             dontPrintLogo=0
         fi
 
-        # generate a "prefix" indentation to have the menu centered in the terminal
-        menuWidth=79
-        COLUMNS=$(tput cols)
-        indent=$(( (COLUMNS - menuWidth) / 2 ))
-        choiceIndent=$(( indent / 2 ))
-        prefix=''
-        choicePrefix=''
-        for ((i=1; i<=indent; i++)) ; do
-            prefix+=' '
-            if [ $i -le $choiceIndent ] ; then
-                choicePrefix+=' '
-            fi
-        done
+        # If the size of the terminal changed, recalculate the position of the logo and menu
+        if [ "$ColumnsUsedForCalcul" != "$COLUMNS" ] ; then
+            RecalculateWindowSize
+        fi
 
         echo
         echo
-        echo "$(tput setaf $menuBorderColor)$prefix+-----------------------------------------------------------------------------+"
-        echo "$prefix!$(tput setaf $menuTitleColor)                                  Main Menu                                  $(tput setaf $menuBorderColor)!"
-        echo "$prefix+-----+----------+------------------------------------------------------------+"
-        echo "$prefix!$(tput setaf $menuLabelColor) Nbr $(tput setaf $menuBorderColor)!$(tput setaf $menuLabelColor) Choice $(tput setaf $menuBorderColor)  !$(tput setaf $menuLabelColor) Detail   $(tput setaf $menuBorderColor)                                                  !"
-        echo "$prefix+-----+----------+------------------------------------------------------------+"
-        echo "$prefix!$(tput setaf $menuItemNumberColor)  1  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) METAR    $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Retrieve METeorological Aerodrome Reports by location      $(tput setaf $menuBorderColor)!"
-        echo "$prefix+-----+----------+------------------------------------------------------------+"
-        echo "$prefix!$(tput setaf $menuItemNumberColor)  2  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) NOTAM   $(tput setaf $menuBorderColor) !$(tput setaf $menuItemColor) Retrieve NOtice(s) to AirMen by location                   $(tput setaf $menuBorderColor)!"
-        echo "$prefix+-----+----------+------------------------------------------------------------+"
-        echo "$prefix!$(tput setaf $menuItemNumberColor)  q  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit     $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit to terminal                                           $(tput setaf $menuBorderColor)!"
-        echo "$prefix+-----+----------+------------------------------------------------------------+"
+        echo "$(tput setaf $menuBorderColor)$menuPrefix+-----------------------------------------------------------------------------+"
+        echo "$menuPrefix!$(tput setaf $menuTitleColor)                                  Main Menu                                  $(tput setaf $menuBorderColor)!"
+        echo "$menuPrefix+-----+----------+------------------------------------------------------------+"
+        echo "$menuPrefix!$(tput setaf $menuLabelColor) Nbr $(tput setaf $menuBorderColor)!$(tput setaf $menuLabelColor) Choice $(tput setaf $menuBorderColor)  !$(tput setaf $menuLabelColor) Detail   $(tput setaf $menuBorderColor)                                                  !"
+        echo "$menuPrefix+-----+----------+------------------------------------------------------------+"
+        echo "$menuPrefix!$(tput setaf $menuItemNumberColor)  1  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) METAR    $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Retrieve METeorological Aerodrome Reports by location      $(tput setaf $menuBorderColor)!"
+        echo "$menuPrefix+-----+----------+------------------------------------------------------------+"
+        echo "$menuPrefix!$(tput setaf $menuItemNumberColor)  2  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) NOTAM   $(tput setaf $menuBorderColor) !$(tput setaf $menuItemColor) Retrieve NOtice(s) to AirMen by location                   $(tput setaf $menuBorderColor)!"
+        echo "$menuPrefix+-----+----------+------------------------------------------------------------+"
+        echo "$menuPrefix!$(tput setaf $menuItemNumberColor)  q  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit     $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit to terminal                                           $(tput setaf $menuBorderColor)!"
+        echo "$menuPrefix+-----+----------+------------------------------------------------------------+"
         echo
         printf "$(tput setaf $menuQueryColor)$choicePrefix""Choice number: "
         tput setaf $menuChoiceColor
@@ -191,17 +209,236 @@ SendToNotam()
     fi
 }
 
+RecalculateWindowSize()
+{
+    ## generate prefixes to center logos and menu in the terminal
+
+    # Width of the terminal
+    COLUMNS=$(tput cols)
+    ColumnsUsedForCalcul="$COLUMNS" #that one is a fixed value and will be used to check if the window size changed
+
+    # logo
+    banner_width=79
+    logoIndent=$(( (COLUMNS - banner_width) / 2 ))
+    borderIndent=$(( logoIndent / 2 ))
+    borderLength=$(( COLUMNS - logoIndent ))
+    borderLine=''
+    logoPrefix=''
+    for ((i=1; i<=logoIndent; i++)) ; do
+        logoPrefix+=' '
+        if [ $i -le $borderIndent ] ; then
+            borderLine+=' '
+        fi
+    done
+
+    for ((i=1; i<=borderLength; i++)) ; do
+        borderLine+='='
+    done
+
+    # menu
+    menuWidth=79
+    menuIndent=$(( (COLUMNS - menuWidth) / 2 ))
+    choiceIndent=$(( menuIndent / 2 ))
+    menuPrefix=''
+    choicePrefix=''
+    for ((i=1; i<=menuIndent; i++)) ; do
+        menuPrefix+=' '
+        if [ $i -le $choiceIndent ] ; then
+            choicePrefix+=' '
+        fi
+    done
+}
+
+MainConfig()
+{
+    if [ "$1" == "--initial" ] ; then
+        clear
+        MainLogo
+        echo
+        tput setaf $warningMessage
+        echo "$choicePrefix""notam/SECRET subfolder not detected, is this the first time you run this software ?"
+        tput sgr0
+        echo "$choicePrefix""Starting initial configuration."
+    elif [ "$1" == "--commandline" ] ; then
+        clear
+        MainLogo
+    elif [ "$1" == "--interactive" ] ; then
+        clear
+        MainLogo
+    fi
+
+    echo
+    echo "$choicePrefix""Welcome to the flight_planning configuration utility."
+    echo
+    echo "$choicePrefix""Configuration of the \"print\" module."
+
+    # if the config directory for print already exists
+    if [ -d "$SCRIPT_DIR/print/SECRET" ] ; then
+        # if the directory isn't empty
+        if [ "$(ls -A $SCRIPT_DIR/print/SECRET)" ] ; then
+            tput setaf $menuQueryColor
+            printf "$choicePrefix""The folder $SCRIPT_DIR/print/SECRET isn't empty. Do you want to overwrite its content ? (y/N) "
+            tput setaf $menuChoiceColor
+            read overWrite
+            tput sgr0
+            # default is No
+            if [ "$overWrite" == "" ] ; then overWrite='n' ; fi
+            case $overWrite in
+                y | Y) configChoice='y' ; echo ;;
+                n | N) configChoice='n' ; echo ;;
+                *) tput setaf $warningMessage ; echo ; echo "$choicePrefix""Unrecognised choice" ; tput sgr0 ; MainConfig ; exit 0 ;;
+            esac
+            if [ "$overWrite" == "y" ] ; then
+                rm -r "$SCRIPT_DIR/print/SECRET"
+            elif [ "$overWrite" == "n" ] ; then
+                echo "$choicePrefix""Skipping configuration of the remote printing feature."
+            else
+                tput setaf $warningMessage
+                echo "$choicePrefix""Unexpected error."
+                echo "$choicePrefix""ERROR: Unable to handle choice: $overWrite"
+                tput sgr0
+                echo
+                exit 1
+            fi
+        else # if the directory is empty
+            rmdir "$SCRIPT_DIR/print/SECRET"
+        fi
+    fi
+
+    # config of remote printing
+    if [ ! -d "$SCRIPT_DIR/print/SECRET" ] ; then
+        echo "$choicePrefix""Configuration of the remote printing feature."
+        tput setaf $menuQueryColor
+        printf "$choicePrefix""Is this installation located on the remote Printer or on the Client (p/C): "
+        tput setaf $menuChoiceColor
+        read configChoice
+        tput sgr0
+
+        # default is client
+        if [ "$configChoice" == "" ] ; then configChoice='c' ; fi
+
+        case $configChoice in
+            p | P) configChoice='p' ; echo ;;
+            c | C) configChoice='c' ; echo ;;
+            *) tput setaf $warningMessage ; echo ; echo "$choicePrefix""Unrecognised choice" ; tput sgr0 ; MainConfig ; exit 0 ;;
+        esac
+
+        mkdir "$SCRIPT_DIR/print/SECRET"
+
+        if [ "$configChoice" == "p" ] ; then
+            echo "$choicePrefix""Done"
+        elif [ "$configChoice" == "c" ] ; then
+            echo
+            tput setaf $menuQueryColor
+            printf "$choicePrefix""Please, specify the IP of the remote device connected to the printer: "
+            tput setaf $menuChoiceColor
+            read printerIP
+            tput setaf $menuQueryColor
+            printf "$choicePrefix""Please, specify the name of the account you wish the software to use on the remote device to use the printer: "
+            tput setaf $menuChoiceColor
+            read accountName
+            tput setaf $menuQueryColor
+            printf "$choicePrefix""Please, specify the PATH to the repo root folder for the session$(tput setaf $menuChoiceColor) $accountName@$printerIP$(tput setaf $menuQueryColor) (without '/' at the end): "
+            tput setaf $menuChoiceColor
+            read repoPATH
+            tput sgr0
+            echo "$choicePrefix""Generating the configuration files."
+            echo "$printerIP" > $SCRIPT_DIR/print/SECRET/printer_ip
+            echo "$accountName" > $SCRIPT_DIR/print/SECRET/user_id
+            echo "$repoPATH" > $SCRIPT_DIR/print/SECRET/repo_path
+            echo "$choicePrefix""Done"
+        else
+            tput setaf $warningMessage
+            echo "$choicePrefix""Unexpected error."
+            echo "$choicePrefix""ERROR: Unable to handle choice: $configChoice"
+            tput sgr0
+            echo
+            exit 1
+        fi
+    fi
+
+    echo
+    echo "$choicePrefix""Configuration of the \"notam\" module."
+
+    # if the config directory for notam already exists
+    if [ -d "$SCRIPT_DIR/notam/SECRET" ] ; then
+        # if the directory isn't empty
+        if [ "$(ls -A $SCRIPT_DIR/notam/SECRET)" ] ; then
+            tput setaf $menuQueryColor
+            printf "$choicePrefix""The folder $SCRIPT_DIR/notam/SECRET isn't empty. Do you want to overwrite its content ? (y/N) "
+            tput setaf $menuChoiceColor
+            read overWrite
+            tput sgr0
+            # default is No
+            if [ "$overWrite" == "" ] ; then overWrite='n' ; fi
+            case $overWrite in
+                y | Y) configChoice='y' ; echo ;;
+                n | N) configChoice='n' ; echo ;;
+                *) tput setaf $warningMessage ; echo ; echo "$choicePrefix""Unrecognised choice" ; tput sgr0 ; MainConfig ; exit 0 ;;
+            esac
+            if [ "$overWrite" == "y" ] ; then
+                rm -r "$SCRIPT_DIR/notam/SECRET"
+            elif [ "$overWrite" == "n" ] ; then
+                echo "$choicePrefix""Skipping configuration of the NOTAM retrieval feature."
+            else
+                tput setaf $warningMessage
+                echo "$choicePrefix""Unexpected error."
+                echo "$choicePrefix""ERROR: Unable to handle choice: $overWrite"
+                tput sgr0
+                echo
+                exit 1
+            fi
+        else # if the directory is empty
+            rmdir "$SCRIPT_DIR/notam/SECRET"
+        fi
+    fi
+
+    # config of NOTAM retrieval
+    if [ ! -d $SCRIPT_DIR/notam/SECRET ] ; then
+        echo "$choicePrefix""Configuration of the NOTAM retrieval feature."
+
+        mkdir $SCRIPT_DIR/notam/SECRET
+
+        echo
+        tput setaf $menuQueryColor
+        printf "$choicePrefix""Please, specify your Client ID for the FAA NOTAM API: "
+        tput setaf $menuChoiceColor
+        read clientID
+        tput setaf $menuQueryColor
+        printf "$choicePrefix""Please, specify your API Key for the FAA NOTAM API: "
+        tput setaf $menuChoiceColor
+        read apiKey
+        tput sgr0
+        echo "$choicePrefix""Generating the configuration files."
+        echo "$clientID" > $SCRIPT_DIR/notam/SECRET/api_client_id
+        echo "$apiKey" > $SCRIPT_DIR/notam/SECRET/api_client_secret
+        echo "$choicePrefix""Done"
+    fi
+
+    echo
+    echo "$choicePrefix""Configuration complete, you can now use the software."
+    echo "$choicePrefix""If you wish to change the configurations, you can run the command \"$(basename $0) --config\" to come back to this utility."
+    read -s -n 1 -p "$choicePrefix""Press any key to continue to main menu."
+    echo
+}
+
 TempFileClearing()
 {
     tput setaf $warningMessage
     echo
-    echo "$choicePrefix""The application wasn't cleanly closed."
-    echo "Clearing temporary files . . ."
+    echo "$choicePrefix""The application wasn't closed cleanly."
+    echo "$choicePrefix""Clearing temporary files . . ."
     tput sgr0
     rm "$1"
     sleep 2
 }
 
+# Check if the script is run for the first time by checking if the SECRET subfolder has been created in the notam module folder
+if [ ! -d $SCRIPT_DIR/notam/SECRET ] ; then
+    MainConfig --initial
+fi
+
+# Check the presence of temp files
 if [ -a $SCRIPT_DIR/metar/.quit ] ; then
     TempFileClearing "$SCRIPT_DIR/metar/.quit"
 fi
