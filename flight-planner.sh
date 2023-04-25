@@ -168,6 +168,8 @@ MainMenu()
         echo "$menuPrefix+-----+----------+------------------------------------------------------------+"
         echo "$menuPrefix!$(tput setaf $menuItemNumberColor)  2  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) NOTAM   $(tput setaf $menuBorderColor) !$(tput setaf $menuItemColor) Retrieve NOtice(s) to AirMen by location                   $(tput setaf $menuBorderColor)!"
         echo "$menuPrefix+-----+----------+------------------------------------------------------------+"
+        echo "$menuPrefix!$(tput setaf $menuItemNumberColor)  c  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Config  $(tput setaf $menuBorderColor) !$(tput setaf $menuItemColor) Start the configuration utility                            $(tput setaf $menuBorderColor)!"
+        echo "$menuPrefix+-----+----------+------------------------------------------------------------+"
         echo "$menuPrefix!$(tput setaf $menuItemNumberColor)  q  $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit     $(tput setaf $menuBorderColor)!$(tput setaf $menuItemColor) Quit to terminal                                           $(tput setaf $menuBorderColor)!"
         echo "$menuPrefix+-----+----------+------------------------------------------------------------+"
         echo
@@ -179,6 +181,7 @@ MainMenu()
         case $menuChoice in
             1) SendToMetar ;;
             2) SendToNotam ;;
+            c | C) MainConfig --interactive ;;
             q | Q) echo ; exit 0 ;;
             *) tput setaf $warningMessage ; echo ; echo "$choicePrefix""Unrecognised option" ; tput sgr0 ; dontClear=1 ; dontPrintLogo=1 ;;
         esac
@@ -444,6 +447,10 @@ if [ -a $SCRIPT_DIR/metar/.quit ] ; then
 fi
 if [ -a $SCRIPT_DIR/notam/.quit ] ; then
     TempFileClearing "$SCRIPT_DIR/notam/.quit"
+fi
+
+if [ "$1" == "--config" ] ; then
+    MainConfig --commandline
 fi
 
 MainMenu
