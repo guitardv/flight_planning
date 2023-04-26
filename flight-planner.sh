@@ -166,7 +166,6 @@ MainMenu()
 
         # If the terminal width is too small, print a warning message
         if [ $COLUMNS -lt $minWindowWidth ] && [ ! -f "$SCRIPT_DIR/.conf.d/noSmallWindowWarning" ] ; then
-            if [ ! -f "$SCRIPT_DIR/.conf.d/noSmallWindowWarning" ] ; then echo "No config" ; fi ###
             tput setaf $warningMessage
             echo
             echo "$choicePrefix""It seems that you are running this software in a small window."
