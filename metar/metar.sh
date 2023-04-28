@@ -108,9 +108,9 @@ MetarMenu()
     tput sgr0
 
     case $menuChoice in
-        1) DisplayMetar ;;
-        2) PrintMetar ;;
-		3) DisplayAndPrintMetar ;;
+        1) DisplayMetar --interactive ;;
+        2) PrintMetar --interactive ;;
+		3) DisplayAndPrintMetar --interactive ;;
         m | M) exit 0 ;;
 		q | Q) touch $SCRIPT_DIR/.quit ; echo ; exit 0 ;;
         *) tput setaf $warningMessage ; echo ; echo "$choicePrefix""Unrecognised option" ; tput sgr0 ; MetarMenu ;;
@@ -119,10 +119,22 @@ MetarMenu()
 
 DisplayMetar()
 {
-	echo "Display"
 	echo
-	read -s -n 1 -p "$choicePrefix""Press any key to continue to main menu."
-	exit 0
+    tput setaf $menuQueryColor
+    printf "$choicePrefix""Enter the ICAO locations of interest separeted by a space and between quotation marks (default: \"CYUL CYHU\"): "
+    tput setaf $menuChoiceColor
+    read icaoMetarLocations
+    tput sgr0
+    echo
+    if [ "$icaoMetarLocations" == "" ] ; then icaoMetarLocations="CYUL CYHU" ; fi
+
+    python3 "$SCRIPT_DIR/metar.py" $icaoMetarLocations 2>> "$SCRIPT_DIR/.metar.log"
+
+	if [ "$1" == "--interactive" ] ; then
+	    echo
+        read -s -n 1 -p "$choicePrefix""Press any key to continue to main menu."
+	    exit 0
+    fi
 }
 
 PrintMetar()
@@ -135,30 +147,37 @@ PrintMetar()
 DisplayAndPrintMetar()
 {
 	echo "Display and print"
-	echo
-	read -s -n 1 -p "$choicePrefix""Press any key to continue to main menu."
-	exit 0
+	if [ "$1" == "--interactive" ] ; then
+	    echo
+        read -s -n 1 -p "$choicePrefix""Press any key to continue to main menu."
+	    exit 0
+    fi
 }
+
+InitialiseLog()
+{
+    if [ -f $SCRIPT_DIR/.metar.log ] ; then
+	    logFileSize=$( wc -c $SCRIPT_DIR/.metar.log | awk '{print $1}' )
+	    # If the log file is larger than 100kb, empty it
+	    if [ $logFileSize -gt 100000 ] ; then echo '' > $SCRIPT_DIR/.metar.log ; fi
+	    unset logFileSize
+    else
+	    touch $SCRIPT_DIR/.metar.log
+    fi
+}
+
+InitialiseLog
+date '+%F %T-%Z' >> $SCRIPT_DIR/.metar.log
 
 # if the script is called in interactive mode
 if [ "$1" == "--interactive" ] ; then
+    echo "Entering interactive mode" >> $SCRIPT_DIR/.metar.log
 	MetarMenu
 	exit 1 # should only exit via MetarMenu, if the script continue past the function, a problem occured
 fi
 
 # if the script is called at startup by the headless acount
 sleep 15
-
-if [ -a $SCRIPT_DIR/.metar.log ] ; then
-	logFileSize=$( wc -c $SCRIPT_DIR/.metar.log | awk '{print $1}' )
-	# If the log file is larger than 100kb, empty it
-	if [ $logFileSize -gt 100000 ] ; then echo '' > $SCRIPT_DIR/.metar.log ; fi
-	unset logFileSize
-else
-	touch $SCRIPT_DIR/.metar.log
-fi
-
-date '+%F %T-%Z' >> $SCRIPT_DIR/.metar.log
 
 # I get the argument passed to this script to pass them to the python script
 for argumentSHcurrent in $@ ; do
