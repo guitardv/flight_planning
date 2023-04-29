@@ -1,4 +1,13 @@
-# flight_planning
+<pre style="color:#54b9da">
+    ______ __ _         __     __     ____   __                                
+   / ____// /(_)____ _ / /_   / /_   / __ \ / /____ _ ____   ____   ___   _____
+  / /_   / // // __ `// __ \ / __/  / /_/ // // __ `// __ \ / __ \ / _ \ / ___/
+ / __/  / // // /_/ // / / // /_   / ____// // /_/ // / / // / / //  __// /    
+/_/    /_//_/ \__, //_/ /_/ \__/  /_/    /_/ \__,_//_/ /_//_/ /_/ \___//_/     
+             /____/                                                            
+</pre>
+
+# <!-- flight_planner -->
 A collection of scripts to retrieve and collate informations relevant to flight planning.<br />
 
 The end goal is to develop a modular flight planning environnment.<br />
