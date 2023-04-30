@@ -470,6 +470,7 @@ MainConfig()
             echo
             exit 1
         fi
+    else
         echo
         echo "$choicePrefix""No user configuration file found in $SCRIPT_DIR/.conf.d"
         echo "$choicePrefix""Nothing to do."
