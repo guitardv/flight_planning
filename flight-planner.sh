@@ -309,7 +309,7 @@ MainConfig()
         # if the directory isn't empty
         if [ "$(ls -A $SCRIPT_DIR/print/SECRET)" ] ; then
             tput setaf $menuQueryColor
-            printf "$choicePrefix""The folder $SCRIPT_DIR/print/SECRET isn't empty. Do you want to overwrite its content ? (y/N) "
+            printf "$choicePrefix""The folder $SCRIPT_DIR/print/SECRET isn't empty. Do you want to overwrite its content ? [y/N] "
             tput setaf $menuChoiceColor
             read overWrite
             tput sgr0
@@ -341,7 +341,7 @@ MainConfig()
     if [ ! -d "$SCRIPT_DIR/print/SECRET" ] ; then
         echo "$choicePrefix""Configuration of the remote printing feature."
         tput setaf $menuQueryColor
-        printf "$choicePrefix""Is this installation located on the remote Printer or on the Client (p/C): "
+        printf "$choicePrefix""Is this installation located on the remote Printer or on the Client [p/C]: "
         tput setaf $menuChoiceColor
         read configChoice
         tput sgr0
@@ -397,7 +397,7 @@ MainConfig()
         # if the directory isn't empty
         if [ "$(ls -A $SCRIPT_DIR/notam/SECRET)" ] ; then
             tput setaf $menuQueryColor
-            printf "$choicePrefix""The folder $SCRIPT_DIR/notam/SECRET isn't empty. Do you want to overwrite its content ? (y/N) "
+            printf "$choicePrefix""The folder $SCRIPT_DIR/notam/SECRET isn't empty. Do you want to overwrite its content ? [y/N] "
             tput setaf $menuChoiceColor
             read overWrite
             tput sgr0
@@ -452,7 +452,7 @@ MainConfig()
         echo
         echo "$choicePrefix""User configuration files detected in $SCRIPT_DIR/.conf.d"
         tput setaf $menuQueryColor
-        printf "$choicePrefix""Do you wish to clear user configurations and return the software to its default settings (FAA NOTAM API and remote printer SSH informations won't be affected) ? (y/N) "
+        printf "$choicePrefix""Do you wish to clear user configurations and return the software to its default settings (FAA NOTAM API and remote printer SSH informations won't be affected) ? [y/N] "
         tput setaf $menuChoiceColor
         read resetConfigToDefault
         tput sgr0
