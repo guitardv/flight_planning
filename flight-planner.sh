@@ -407,6 +407,17 @@ MainConfig()
                 echo "$choicePrefix""Skipping."
             fi
         elif [ "$configChoice" == "c" ] ; then
+            # if for some reason this device was previously defined as the printer, erase the config file
+            if [ -f "$SCRIPT_DIR/.conf.d/deviceIsPrinter" ] ; then
+                if [ "$(rm $SCRIPT_DIR/.conf.d/deviceIsPrinter)" == "" ] ; then
+                    echo "$choicePrefix""Done"
+                else
+                    tput setaf $warningMessage
+                    echo "$choicePrefix""Failed. Couldn't delete the configuration file defining this device as the printer."
+                    tput sgr0
+                    echo "$choicePrefix""Skipping."
+                fi
+            fi
             echo
             tput setaf $menuQueryColor
             printf "$choicePrefix""Please, specify the IP of the remote device connected to the printer: "
