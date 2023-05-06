@@ -165,7 +165,7 @@ MainMenu()
         fi
 
         # If the terminal width is too small, print a warning message
-        if [ $COLUMNS -lt $minWindowWidth ] && [ ! -f "$SCRIPT_DIR/.conf.d/noSmallWindowWarning" ] ; then
+        if [ $COLUMNS -lt $minWindowWidth ] && [ ! -f "$SCRIPT_DIR/.conf.d/noSmallWindowWarning.userconfig" ] ; then
             tput setaf $warningMessage
             echo
             echo "$choicePrefix""It seems that you are running this software in a small window."
@@ -179,7 +179,7 @@ MainMenu()
                 if [ ! -d "$SCRIPT_DIR/.conf.d" ] ; then
                     mkdir "$SCRIPT_DIR/.conf.d"
                 fi
-                touch "$SCRIPT_DIR/.conf.d/noSmallWindowWarning"
+                touch "$SCRIPT_DIR/.conf.d/noSmallWindowWarning.userconfig"
                 echo "$choicePrefix""This warning won't be displayed anymore. You can restore it using the configuration utility."
             else
                 echo "$choicePrefix""Proceeding to main menu."
@@ -301,6 +301,46 @@ MainConfig()
 
     echo
     echo "$choicePrefix""Welcome to the flight_planning configuration utility."
+
+    # User config
+    if [ ! -d "$SCRIPT_DIR/.conf.d" ] ; then
+        mkdir "$SCRIPT_DIR/.conf.d"
+    else
+        if [ "$(ls -A $SCRIPT_DIR/.conf.d/*.userconfig)" ] ; then
+            echo
+            echo "$choicePrefix""User configuration files detected in $SCRIPT_DIR/.conf.d"
+            tput setaf $menuQueryColor
+            printf "$choicePrefix""Do you wish to clear user configurations and return the software to its default settings (FAA NOTAM API and remote printer SSH informations won't be affected) ? [y/N] "
+            tput setaf $menuChoiceColor
+            read resetConfigToDefault
+            tput sgr0
+            echo
+            if [ "$resetConfigToDefault" == "y" ] || [ "$resetConfigToDefault" == "Y" ] ; then
+                if [ "$(rm $SCRIPT_DIR/.conf.d/*.userconfig)" == "" ] ; then
+                    echo "$choicePrefix""Done"
+                else
+                    tput setaf $warningMessage
+                    echo "$choicePrefix""Failed. At least one configuration file couldn't be deleted."
+                    tput sgr0
+                    echo "$choicePrefix""Skipping."
+                fi
+            elif [ "$resetConfigToDefault" == "n" ] || [ "$resetConfigToDefault" == "N" ] || [ "$resetConfigToDefault" == "" ] ; then
+                echo "Ignoring user settings."
+            else
+                tput setaf $warningMessage
+                echo "$choicePrefix""Unexpected error."
+                echo "$choicePrefix""ERROR: Unable to handle choice: $resetConfigToDefault"
+                tput sgr0
+                echo
+                exit 1
+            fi
+        else
+            echo
+            echo "$choicePrefix""No user configuration file found in $SCRIPT_DIR/.conf.d"
+            echo "$choicePrefix""Nothing to do."
+        fi
+    fi
+
     echo
     echo "$choicePrefix""Configuration of the \"print\" module."
 
@@ -358,7 +398,14 @@ MainConfig()
         mkdir "$SCRIPT_DIR/print/SECRET"
 
         if [ "$configChoice" == "p" ] ; then
-            echo "$choicePrefix""Done"
+            if [ "$(touch $SCRIPT_DIR/.conf.d/deviceIsPrinter)" == "" ] ; then
+                echo "$choicePrefix""Done"
+            else
+                tput setaf $warningMessage
+                echo "$choicePrefix""Failed. Couldn't create the configuration file $SCRIPT_DIR/.conf.d/deviceIsPrinter."
+                tput sgr0
+                echo "$choicePrefix""Skipping."
+            fi
         elif [ "$configChoice" == "c" ] ; then
             echo
             tput setaf $menuQueryColor
@@ -445,36 +492,6 @@ MainConfig()
         echo "$clientID" > $SCRIPT_DIR/notam/SECRET/api_client_id
         echo "$apiKey" > $SCRIPT_DIR/notam/SECRET/api_client_secret
         echo "$choicePrefix""Done"
-    fi
-
-    # User config
-    if [ -d "$SCRIPT_DIR/.conf.d" ] && [ "$(ls -A $SCRIPT_DIR/.conf.d)" ] ; then
-        echo
-        echo "$choicePrefix""User configuration files detected in $SCRIPT_DIR/.conf.d"
-        tput setaf $menuQueryColor
-        printf "$choicePrefix""Do you wish to clear user configurations and return the software to its default settings (FAA NOTAM API and remote printer SSH informations won't be affected) ? [y/N] "
-        tput setaf $menuChoiceColor
-        read resetConfigToDefault
-        tput sgr0
-        echo
-        if [ "$resetConfigToDefault" == "y" ] || [ "$resetConfigToDefault" == "Y" ] ; then
-            rm $SCRIPT_DIR/.conf.d/*
-            echo "$choicePrefix""Done"
-        elif [ "$resetConfigToDefault" == "n" ] || [ "$resetConfigToDefault" == "N" ] || [ "$resetConfigToDefault" == "" ] ; then
-            echo "Ignoring user settings."
-        else
-            tput setaf $warningMessage
-            echo "$choicePrefix""Unexpected error."
-            echo "$choicePrefix""ERROR: Unable to handle choice: $resetConfigToDefault"
-            tput sgr0
-            echo
-            exit 1
-        fi
-    else
-        echo
-        echo "$choicePrefix""No user configuration file found in $SCRIPT_DIR/.conf.d"
-        echo "$choicePrefix""Nothing to do."
-        echo
     fi
 
     echo
