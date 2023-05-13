@@ -184,14 +184,21 @@ for argumentSHcurrent in $@ ; do
 	if [ $argumentSHcurrent != $0 ] ; then argumentsSH=$argumentsSH' '$argumentSHcurrent ; fi
 done
 
+# If the display is turned off, don't go further and check the display power status every minute
+while [ "$(cat /sys/class/backlight/10-0045/bl_power)" == "1" ] ; do sleep 60 ; done
+
 python3 "$SCRIPT_DIR/metar.py" $argumentsSH 2>> "$SCRIPT_DIR/.metar.log"
 
 status=$?
 
 # if the python script exit with a non 0 code (failure), start it again after a 5 seconds pause
 while [ "$status" -ne 0 ] ; do
-        sleep 5
-        date '+%F %T-%Z' >> $SCRIPT_DIR/.metar.log
-        python3 $SCRIPT_DIR/metar.py $argumentsSH 2>> $SCRIPT_DIR/.metar.log
-        status=$?
+    sleep 5
+    # If the display is turned off, don't go further and check the display power status every minute
+    while [ "$(cat /sys/class/backlight/10-0045/bl_power)" == "1" ] ; do sleep 60 ; done
+    date '+%F %T-%Z' >> $SCRIPT_DIR/.metar.log
+    python3 $SCRIPT_DIR/metar.py $argumentsSH 2>> $SCRIPT_DIR/.metar.log
+    status=$?
 done
+
+exit 0
