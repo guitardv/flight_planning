@@ -29,6 +29,7 @@ import re
 import time
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
+from os.path import exists
 
 metarURL = "https://flightplanning.navcanada.ca/cgi-bin/Fore-obs/metar.cgi?NoSession=NS_Inconnu&format=raw&Langue=anglais&Region=can&Stations="
 DefaultAirport = "CYHU"
@@ -62,10 +63,12 @@ while(udvLooped):
     if(udvLooped == 2):
         udvLooped = 0
 
-    with open("/sys/class/backlight/10-0045/bl_power", 'r') as backlight_power:
-        # If the display is turned off, don't go further and check the display power status every minute
-        while(backlight_power.read() == '1'):
-            time.sleep(60)
+    # if the script is running on the RPi
+    if(os.path.exists("/sys/class/backlight/10-0045/bl_power")):
+        with open("/sys/class/backlight/10-0045/bl_power", 'r') as backlight_power:
+            # If the display is turned off, don't go further and check the display power status every minute
+            while(backlight_power.read() == '1'):
+                time.sleep(60)
 
     metarWebPage = BeautifulSoup(urlopen(metarURL).read().decode("ISO-8859-1"), "lxml")
     metarWebPageText = metarWebPage.get_text().splitlines()
