@@ -167,7 +167,7 @@ InitialiseLog()
 }
 
 InitialiseLog
-date '+%F %T-%Z' >> $SCRIPT_DIR/.metar.log
+date '+%F %T %z' >> $SCRIPT_DIR/.metar.log
 
 # if the script is called in interactive mode
 if [ "$1" == "--interactive" ] ; then
@@ -196,7 +196,7 @@ while [ "$status" -ne 0 ] ; do
     sleep 5
     # If the display is turned off, don't go further and check the display power status every minute
     while [ "$(cat /sys/class/backlight/10-0045/bl_power)" == "1" ] ; do sleep 60 ; done
-    date '+%F %T-%Z' >> $SCRIPT_DIR/.metar.log
+    date '+%F %T %z' >> $SCRIPT_DIR/.metar.log
     python3 $SCRIPT_DIR/metar.py $argumentsSH 2>> $SCRIPT_DIR/.metar.log
     status=$?
 done
