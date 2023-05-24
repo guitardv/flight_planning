@@ -25,6 +25,8 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+icaoMetarLocations=""
+
 # tput colors
 FluorGreen=46
 SkyBlue=81
@@ -112,12 +114,19 @@ MetarMenu()
         2) PrintMetar --interactive ;;
 		3) DisplayAndPrintMetar --interactive ;;
         m | M) exit 0 ;;
-		q | Q) touch $SCRIPT_DIR/.quit ; echo ; exit 0 ;;
+		q | Q) MetarQuit ;;
         *) tput setaf $warningMessage ; echo ; echo "$choicePrefix""Unrecognised option" ; tput sgr0 ; MetarMenu ;;
     esac
 }
 
-DisplayMetar()
+MetarQuit()
+{
+    touch "$SCRIPT_DIR/.quit"
+    echo
+    exit 0
+}
+
+MetarICAOlocationQuery()
 {
 	echo
     tput setaf $menuQueryColor
@@ -127,7 +136,11 @@ DisplayMetar()
     tput sgr0
     echo
     if [ "$icaoMetarLocations" == "" ] ; then icaoMetarLocations="CYUL CYHU" ; fi
+}
 
+DisplayMetar()
+{
+    MetarICAOlocationQuery
     python3 "$SCRIPT_DIR/metar.py" $icaoMetarLocations 2>> "$SCRIPT_DIR/.metar.log"
 
 	if [ "$1" == "--interactive" ] ; then
@@ -139,9 +152,23 @@ DisplayMetar()
 
 PrintMetar()
 {
-	echo "Print"
-	sleep 2
-	exit 0
+    if [ ! -d "$SCRIPT_DIR/../.conf.d" ] ; then
+        echo "Unable to determine if the script is runnig on the client or the printer. You are going to be redirected to the configuration utility."
+        echo
+        read -s -n 1 -p "$choicePrefix""Press any key to continue."
+        bash "'$SCRIPT_DIR/../flight-planner.sh' --config"
+        MetarQuit
+    elif [ -f "$SCRIPT_DIR/../.conf.d/deviceIsPrinter" ] ; then
+        bash "$SCRIPT_DIR/../print/print_metar.sh" $icaoMetarLocations 2>> "$SCRIPT_DIR/.metar.log"
+    else
+        bash "$SCRIPT_DIR/../print/print_metar_remotely.sh" $icaoMetarLocations 2>> "$SCRIPT_DIR/.metar.log"
+    fi
+
+	if [ "$1" == "--interactive" ] ; then
+	    echo
+        read -s -n 1 -p "$choicePrefix""Press any key to continue to main menu."
+	    exit 0
+    fi
 }
 
 DisplayAndPrintMetar()
