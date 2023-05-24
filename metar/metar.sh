@@ -159,8 +159,10 @@ PrintMetar()
         bash "'$SCRIPT_DIR/../flight-planner.sh' --config"
         MetarQuit
     elif [ -f "$SCRIPT_DIR/../.conf.d/deviceIsPrinter" ] ; then
+        MetarICAOlocationQuery
         bash "$SCRIPT_DIR/../print/print_metar.sh" $icaoMetarLocations 2>> "$SCRIPT_DIR/.metar.log"
     else
+        MetarICAOlocationQuery
         bash "$SCRIPT_DIR/../print/print_metar_remotely.sh" $icaoMetarLocations 2>> "$SCRIPT_DIR/.metar.log"
     fi
 
