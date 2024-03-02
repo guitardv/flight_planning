@@ -121,8 +121,8 @@ Test:
 If the option -t or --test is used, raw NOTAM data will be imported
 from files in the "example" subfolder, if available, instead of being
 downloaded. Example files names should start with the ICAO location
-id (uppercase) and end with an extansion corresponding to their format
-(.geoJSON or .aixm).
+code (uppercase) and end with an extension corresponding to their
+format (.geoJSON or .aixm).
 Eg.: ./example/CYHU.geoJSON or ./example/KRSW_20230406.aixm
 /!\ The only format supported for now is geoJSON.
 

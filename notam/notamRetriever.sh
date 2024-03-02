@@ -107,8 +107,8 @@ Help()
     echo "If the option -t or --test is used, raw NOTAM data will be imported"
     echo "from files in the \"example\" subfolder, if available, instead of being"
     echo "downloaded. Example files names should start with the ICAO location"
-    echo "id (uppercase) and end with an extansion corresponding to their format"
-    echo "(.geoJSON or .aixm)."
+    echo "code (uppercase) and end with an extension corresponding to their"
+    echo "format (.geoJSON or .aixm)."
     echo "Eg.: ./example/CYHU.geoJSON or ./example/KRSW_20230406.aixm"
     echo "/!\ The only format supported for now is geoJSON."
 }
@@ -254,7 +254,7 @@ unset outputFileName # only used for the default file name, use PATH_outputFile 
 
 
 # if the destination temporary file exist, empty it and print a warning message, else create it empty
-if [ -a "$PATH_outputFile.tmp" ] ; then
+if [ -f "$PATH_outputFile.tmp" ] ; then
     echo "" > "$PATH_outputFile.tmp"
     echo "$(basename $0): Warning: temporary file $PATH_outputFile.tmp wasn't deleted correctly during last session."
 else
