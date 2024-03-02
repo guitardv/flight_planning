@@ -14,7 +14,7 @@ The end goal is to develop a modular flight planning environnment.<br />
 This project is still in its early developpement stages, expect it to be riddled with issues and vulnerabilities.<br />
 Since I'm working on it alone and on my spare time, don't expect any kind of consistent schedule. Part of my motivation for this project is to practice programming, so expect weird stuff like a (needlessly) large number of languages.<br /><br />
 The intended use of this Work is educational, **DO NOT USE TO PREPARE AN ACTUAL FLIGHT**.<br />
-While I'm aiming at making it a reliable source of aeronotical informations by taking steps such as only using official primary sources, the Work is still very much the work of an amateur and should be treated as such.<br /><br />
+While I'm aiming at making it a reliable source of aeronotical informations by taking steps such as only using official primary sources, this is still very much the work of an amateur and should be treated as such.<br /><br />
 Please, read this file and the *LICENSE* file provided in the same folder before using this Work.
 
 ## Installation and Setup
