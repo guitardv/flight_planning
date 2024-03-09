@@ -63,7 +63,8 @@ You'll find bellow an overview of the modules currently integrated/in developpme
 
 ### METAR
 Works only for Canadian airports.<br />
-Weather data provided by Environment Canada and NAV CANADA via <https://flightplanning.navcanada.ca>.
+Weather data provided by Environment Canada and NAV CANADA via <https://flightplanning.navcanada.ca>.<br />
+<b>/!\\ This module is temporarily unusable since NAV CANADA closed their legacy <https://flightplanning.navcanada.ca> website in favor of the newer <https://spaces.navcanada.ca>. I'll work on restoring this service as soon as possible. /!\\</b>
 
 ### NOTAM
 NOTAMs provided by the FAA NOTAM API.<br />
