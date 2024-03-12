@@ -175,7 +175,22 @@ PrintMetar()
 
 DisplayAndPrintMetar()
 {
-	echo "Display and print"
+	if [ ! -d "$SCRIPT_DIR/../.conf.d" ] ; then
+        echo "Unable to determine if the script is runnig on the client or the printer. You are going to be redirected to the configuration utility."
+        echo
+        read -s -n 1 -p "$choicePrefix""Press any key to continue."
+        bash "'$SCRIPT_DIR/../flight-planner.sh' --config"
+        MetarQuit
+    elif [ -f "$SCRIPT_DIR/../.conf.d/deviceIsPrinter" ] ; then
+        MetarICAOlocationQuery
+        bash "$SCRIPT_DIR/../print/print_metar.sh" $icaoMetarLocations 2>> "$SCRIPT_DIR/.metar.log"
+    else
+        MetarICAOlocationQuery
+        bash "$SCRIPT_DIR/../print/print_metar_remotely.sh" $icaoMetarLocations 2>> "$SCRIPT_DIR/.metar.log"
+    fi
+
+    python3 "$SCRIPT_DIR/metar.py" $icaoMetarLocations 2>> "$SCRIPT_DIR/.metar.log"
+    
 	if [ "$1" == "--interactive" ] ; then
 	    echo
         read -s -n 1 -p "$choicePrefix""Press any key to continue to main menu."
