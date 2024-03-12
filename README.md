@@ -62,9 +62,8 @@ At the moment, only the **NOTAM** and the **Print** modules requires some settin
 You'll find bellow an overview of the modules currently integrated/in developpment.
 
 ### METAR
-Works only for Canadian airports.<br />
-Weather data provided by Environment Canada and NAV CANADA via <https://flightplanning.navcanada.ca>.<br />
-<b>/!\\ This module is temporarily unusable since NAV CANADA closed their legacy <https://flightplanning.navcanada.ca> website in favor of the newer <https://spaces.navcanada.ca>. I'll work on restoring this service as soon as possible. /!\\</b>
+Weather data provided by <https://metar-taf.com>.<br />
+By default, the last 3 METAR messages are repported. That number can be changed by editing the value of the variable `numberOfMetarMessagesToBeReported` in metar/metar.py. All the SPECI messages emited after the last repported NOTAM will be included.<br />
 
 ### NOTAM
 NOTAMs provided by the FAA NOTAM API.<br />
