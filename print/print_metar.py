@@ -26,8 +26,8 @@ import sys
 printer = Adafruit_Thermal("/dev/serial0", 19200, timeout=5)
 
 # Print the 272x196 pixel logo in logo-nav-canada-blue.py
-import bitmaps.logoAWC as LogoAWC
-printer.printBitmap(LogoAWC.width, LogoAWC.height, LogoAWC.data)
+import bitmaps.logoAWCUS as logoAWCUS
+printer.printBitmap(logoAWCUS.width, logoAWCUS.height, logoAWCUS.data)
 
 printer.println(sys.stdin.read()) # I print the stdin, which comes from the cat filetoprint.txt
 printer.feed(2) # make the printer feed a bit more paper, else the last 1.5 printed lines are bellow the printer cover
