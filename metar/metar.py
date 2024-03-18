@@ -126,6 +126,7 @@ while(udvLooped):
             for i in range(len(headerLinesToAdd)):
                 metarWebPageText.insert(headerLinesToAdd[i]+1,"METAR/SPECI")
         del headerLinesToAdd
+    del stationQt
 
     # footer
     metarWebPageText.insert(len(metarWebPageText),'')
