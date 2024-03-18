@@ -43,6 +43,7 @@ includeTAF = "true"
 ageOfEarliestMetarMessageToBeReported = "3"
 metarURL = "https://aviationweather.gov/api/data/metar.php?format=raw&order=id%252C-obs&sep=true&taf=" + includeTAF + "&hours=" + ageOfEarliestMetarMessageToBeReported + "&ids="
 argvLen = len(sys.argv)
+stationQt = 0
 
 # for the program to stay open in the terminal and refresh
 # the METAR every minute instead of printing the METAR once and closing,
@@ -51,17 +52,21 @@ udvLooped = 2
 
 if(argvLen == 1):
     metarURL = metarURL+DefaultAirport
+    stationQt = 1
 elif(argvLen > 1):
     if("-l" in sys.argv or "--looped" in sys.argv):
         udvLooped = 1
         if(argvLen == 2):
             metarURL = metarURL+DefaultAirport
-    if(sys.argv[1] != "-l" and sys.argv[1] != "--looped"):
+            stationQt = 1
+    if(sys.argv[1] != "-l" and sys.argv[1] != "--looped" and metarURL[-1:] == '='):
         metarURL = metarURL + sys.argv[1]
+        stationQt = 1
     if(argvLen>2):
         for i in range(2, argvLen):
             if(sys.argv[i] != "-l" and sys.argv[i] != "--looped"):
                 metarURL = metarURL + "," + sys.argv[i]
+                stationQt = stationQt + 1
 else:
     sys.exit("Invalid argument length.")
 
@@ -87,6 +92,7 @@ while(udvLooped):
     ## Formatage ##
     ###############
 
+    # header
     metarWebPageText.insert(0, "AWC - Forecasts and Observations")
     metarWebPageText.insert(1, '')
     metarWebPageText.insert(2, datetime.now(timezone.utc).strftime("Request generated at %Y-%m-%d %H:%M %Z."))
@@ -98,9 +104,30 @@ while(udvLooped):
         metarWebPageText.insert(4,"METAR")
 
     metarWebPageText.insert(5,'')
+    metarWebPageText.insert(6,"METAR/SPECI")
 
     # METAR/TAF go there
 
+    # If there's more than one stations in the report, add the "METAR/SPECI" header above all metar/speci message groups
+    if(stationQt > 1):
+        headerLinesToAdd = []
+        emptyLineInText = 0
+        for i in range(6,len(metarWebPageText)):
+            if(metarWebPageText[i] == ''):
+                emptyLineInText = emptyLineInText + 1
+                if(emptyLineInText == 2):
+                    emptyLineInText = 0
+                    headerLinesToAdd.insert(0,i)
+                    stationQt = stationQt - 1
+                    if(stationQt == 1):
+                        break
+        del emptyLineInText
+        if(len(headerLinesToAdd) > 0):
+            for i in range(len(headerLinesToAdd)):
+                metarWebPageText.insert(headerLinesToAdd[i]+1,"METAR/SPECI")
+        del headerLinesToAdd
+
+    # footer
     metarWebPageText.insert(len(metarWebPageText),'')
     metarWebPageText.insert(len(metarWebPageText),"Weather data provided by the US Aviation Weather Center")
 
