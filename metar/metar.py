@@ -40,7 +40,7 @@ from urllib.request import urlopen
 from os.path import exists
 from datetime import datetime, timezone
 
-DefaultAirport = "CYHU"
+DefaultAirport = "CYHU".upper()
 includeTAF = "true"
 ageOfEarliestMetarMessageToBeReported = "3"
 retryIfRequestFail = 3
@@ -48,7 +48,7 @@ retryIfRequestFail = 3
 timeBetweenRetry = 1
 metarURL = "https://aviationweather.gov/api/data/metar.php?format=raw&order=ids%2C-obs&sep=true&taf=" + includeTAF + "&hours=" + ageOfEarliestMetarMessageToBeReported + "&ids="
 argvLen = len(sys.argv)
-stationQt = 0
+stationICAOlist = []
 
 # for the program to stay open in the terminal and refresh
 # the METAR every minute instead of printing the METAR once and closing,
@@ -57,21 +57,21 @@ udvLooped = 2
 
 if(argvLen == 1):
     metarURL = metarURL+DefaultAirport
-    stationQt = 1
+    stationICAOlist.append(DefaultAirport)
 elif(argvLen > 1):
     if("-l" in sys.argv or "--looped" in sys.argv):
         udvLooped = 1
         if(argvLen == 2):
             metarURL = metarURL+DefaultAirport
-            stationQt = 1
+            stationICAOlist.append(DefaultAirport)
     if(sys.argv[1] != "-l" and sys.argv[1] != "--looped" and metarURL[-1:] == '='):
-        metarURL = metarURL + sys.argv[1]
-        stationQt = 1
+        metarURL = metarURL + sys.argv[1].upper()
+        stationICAOlist.append(sys.argv[1].upper())
     if(argvLen>2):
         for i in range(2, argvLen):
             if(sys.argv[i] != "-l" and sys.argv[i] != "--looped"):
-                metarURL = metarURL + "," + sys.argv[i]
-                stationQt = stationQt + 1
+                metarURL = metarURL + "," + sys.argv[i].upper()
+                stationICAOlist.append(sys.argv[i].upper())
 else:
     sys.exit("Invalid argument length.")
 
@@ -133,29 +133,38 @@ while(udvLooped):
         metarWebPageText.insert(4,"METAR")
 
     metarWebPageText.insert(5,'')
-    metarWebPageText.insert(6,"METAR/SPECI")
+    metarWebPageText.insert(6,"METAR/SPECI " + stationICAOlist[0])
 
     # METAR/TAF go there
 
-    # If there's more than one stations in the report, add the "METAR/SPECI" header above all metar/speci message groups
-    if(stationQt > 1):
-        headerLinesToAdd = []
-        emptyLineInText = 0
-        for i in range(6,len(metarWebPageText)):
-            if(metarWebPageText[i] == ''):
-                emptyLineInText = emptyLineInText + 1
-                if(emptyLineInText == 2):
-                    emptyLineInText = 0
-                    headerLinesToAdd.insert(0,i)
-                    stationQt = stationQt - 1
-                    if(stationQt == 1):
-                        break
-        del emptyLineInText
-        if(len(headerLinesToAdd) > 0):
-            for i in range(len(headerLinesToAdd)):
-                metarWebPageText.insert(headerLinesToAdd[i]+1,"METAR/SPECI")
-        del headerLinesToAdd
+    # If there's more than one stations in the report, add the "METAR/SPECI <ICAO>" header above all metar/speci message groups
+    # Add an indentation before all METAR/SPECI messages
+    stationQt = len(stationICAOlist)
+    headerLinesToAdd = []
+    emptyLineInText = 0
+    # the range start at 7 because the last line inserted is number 6
+    for i in range(7,len(metarWebPageText)):
+        if(metarWebPageText[i] == ''):
+            emptyLineInText = emptyLineInText + 1
+            if(emptyLineInText == 2):
+                # if after the metar/taf of one station
+                emptyLineInText = 0
+                headerLinesToAdd.insert(0,i)
+                stationQt = stationQt - 1
+            elif(stationQt <= 1 and emptyLineInText == 1):
+                # if after the last metar/speci but before the last taf
+                break
+        else:
+            if(emptyLineInText == 0):
+                # if current line is a metar/speci message
+                metarWebPageText[i] = "  " + metarWebPageText[i]
+    del emptyLineInText
     del stationQt
+    if(len(headerLinesToAdd) > 0):
+        # If there's more than one stations in the report, add the "METAR/SPECI <ICAO>" header above all metar/speci message groups
+        for i in range(len(headerLinesToAdd)):
+            metarWebPageText.insert(headerLinesToAdd[i]+1,"METAR/SPECI " + stationICAOlist[-(i+1)])
+    del headerLinesToAdd
 
     # footer
     metarWebPageText.insert(len(metarWebPageText),'')
