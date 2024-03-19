@@ -63,7 +63,7 @@ You'll find bellow an overview of the modules currently integrated/in developpme
 
 ### METAR
 Weather data provided by US Gov NOAA Aviation Weather Center API (<https://aviationweather.gov/data/api/#/Data/dataMetars>).<br />
-By default, METAR/SPECI messages for the last 3 hours are repported. That number can be changed by editing the value of the variable `ageOfEarliestMetarMessageToBeReported` in metar/metar.py. TAF is provided by default, if you don't want the TAF to be appended after the METAR/SPECI messages, change the value of `includeTAF` to `false` in metar/metar.py.<br />
+By default, METAR/SPECI messages for the last 3 hours are repported. That number can be changed by editing the value of the variable `ageOfEarliestMetarMessageToBeReported` in metar/metar.py. TAF is provided by default, if you don't want the TAF to be appended after the METAR/SPECI messages, change the value of `includeTAF` to `"false"` in metar/metar.py.<br />
 
 ### NOTAM
 NOTAMs provided by the FAA NOTAM API.<br />
