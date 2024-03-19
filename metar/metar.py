@@ -20,10 +20,13 @@
 #       https://github.com/guitardv/flight_planning/blob/main/README.md
 ##############################################################################
 
-# version 1.3
+# version 1.3.1
 # import metar from designated airports (default: CYHU) and print them in the standard output
 
 # changes
+# v 1.3.1
+# exception handling for the AWC api request.
+# simplification of the api response processing: I no longer need to use beautifulsoup since the AWC api return raw text.
 # v 1.3
 # switching the source of meteorological information from the commercial metar-taf.com to US Gov NOAA Aviation Weather Center API (https://aviationweather.gov/data/api/#/Data/dataMetars)
 # v 1.2
@@ -33,7 +36,6 @@
 import sys
 import os
 import time
-from bs4 import BeautifulSoup
 from urllib.request import urlopen
 from os.path import exists
 from datetime import datetime, timezone
@@ -41,6 +43,9 @@ from datetime import datetime, timezone
 DefaultAirport = "CYHU"
 includeTAF = "true"
 ageOfEarliestMetarMessageToBeReported = "3"
+retryIfRequestFail = 3
+#time in seconds, the number of current retry is added to this value so for the first retry (retry 0), no time will be added, for retry 1, 1s will be added, for retry 2, 2s etc...
+timeBetweenRetry = 1
 metarURL = "https://aviationweather.gov/api/data/metar.php?format=raw&order=ids%2C-obs&sep=true&taf=" + includeTAF + "&hours=" + ageOfEarliestMetarMessageToBeReported + "&ids="
 argvLen = len(sys.argv)
 stationQt = 0
@@ -84,8 +89,32 @@ while(udvLooped):
             while(backlight_power.read() == '1'):
                 time.sleep(60)
 
-    metarWebPage = BeautifulSoup(urlopen(metarURL).read().decode("ISO-8859-1"), "lxml")
-    metarWebPageText = metarWebPage.get_text().splitlines()
+    # if the initial request to the api fail (html status code != 200), the request will be tried again retryIfRequestFail time with a pause of
+    # timeBetweenRetry+<number of retry> second(s) between each retry
+    for i in range(retryIfRequestFail+1):
+        try:
+            metarWebPage = urlopen(metarURL)
+        except Exception as e:
+            if(i == retryIfRequestFail):
+                print("\nError: API request failed with exception " + str(e) + ".\n\n   Maximum number of retry reached.\n")
+                sys.exit(1)
+            else:
+                print("\nError: API request failed with exception " + str(e) + ".\n")
+                time.sleep(timeBetweenRetry+i)
+                print("   Trying again.\n")
+                continue
+        else:
+            if(metarWebPage.getcode() == 200):
+                metarWebPageText = metarWebPage.read().decode("UTF-8").splitlines()
+                break
+            else:
+                if(i == retryIfRequestFail):
+                    print("\nError: API request failed with HTML status code " + str(metarWebPage.getcode()) + ".\n\n   Maximum number of retry reached.\n")
+                    sys.exit(1)
+                else:
+                    print("\nError: API request failed with HTML status code " + str(metarWebPage.getcode()) + ".\n")
+                    time.sleep(timeBetweenRetry+i)
+                    print("   Trying again.\n")
 
  
     ###############
