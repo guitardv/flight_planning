@@ -41,7 +41,7 @@ from datetime import datetime, timezone
 DefaultAirport = "CYHU"
 includeTAF = "true"
 ageOfEarliestMetarMessageToBeReported = "3"
-metarURL = "https://aviationweather.gov/api/data/metar.php?format=raw&order=id%252C-obs&sep=true&taf=" + includeTAF + "&hours=" + ageOfEarliestMetarMessageToBeReported + "&ids="
+metarURL = "https://aviationweather.gov/api/data/metar.php?format=raw&order=ids%2C-obs&sep=true&taf=" + includeTAF + "&hours=" + ageOfEarliestMetarMessageToBeReported + "&ids="
 argvLen = len(sys.argv)
 stationQt = 0
 
