@@ -24,6 +24,8 @@
 # import metar from designated airports (default: CYHU) and print them in the standard output
 
 # changes
+# v 1.3.2
+# corrected the bug where one metar was missing at the time a new one was issued
 # v 1.3.1
 # exception handling for the AWC api request.
 # simplification of the api response processing: I no longer need to use beautifulsoup since the AWC api return raw text.
@@ -42,7 +44,8 @@ from datetime import datetime, timezone
 
 DefaultAirport = "CYHU".upper()
 includeTAF = "true"
-ageOfEarliestMetarMessageToBeReported = "3"
+# the .12 is added because otherwise the metar from ageOfEarliestMetarMessageToBeReported hours ago is removed before the new one is published
+ageOfEarliestMetarMessageToBeReported = "3.12"
 retryIfRequestFail = 3
 #time in seconds, the number of current retry is added to this value so for the first retry (retry 0), no time will be added, for retry 1, 1s will be added, for retry 2, 2s etc...
 timeBetweenRetry = 1
