@@ -1,6 +1,6 @@
 geojson==3.1.0
 lxml==5.1.0
-Pillow==10.2.0
+Pillow==10.3.0
 pyserial==3.5
 urllib3==2.2.1
 DateTime==5.4
