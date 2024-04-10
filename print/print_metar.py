@@ -29,7 +29,7 @@ printer = Adafruit_Thermal("/dev/serial0", 19200, timeout=5)
 import bitmaps.logoAWCUS as logoAWCUS
 printer.printBitmap(logoAWCUS.width, logoAWCUS.height, logoAWCUS.data)
 
-printer.println(sys.stdin.read()) # I print the stdin, which comes from the cat filetoprint.txt
+printer.println(sys.stdin.read()) # I print the stdin, which was piped in from metar.py
 printer.feed(2) # make the printer feed a bit more paper, else the last 1.5 printed lines are bellow the printer cover
 printer.setDefault() # Restore printer to defaults
 
