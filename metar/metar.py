@@ -20,7 +20,7 @@
 #       https://github.com/guitardv/flight_planning/blob/main/README.md
 ##############################################################################
 
-# version 1.3.1
+# version 1.3.2
 # import metar from designated airports (default: CYHU) and print them in the standard output
 
 # changes

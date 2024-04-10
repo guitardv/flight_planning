@@ -25,7 +25,7 @@ import sys
 
 printer = Adafruit_Thermal("/dev/serial0", 19200, timeout=5)
 
-# Print the 272x196 pixel logo in logo-nav-canada-blue.py
+# Print the 384x160 pixel AWC + USAGov logo in logoAWCUS.py
 import bitmaps.logoAWCUS as logoAWCUS
 printer.printBitmap(logoAWCUS.width, logoAWCUS.height, logoAWCUS.data)
 
