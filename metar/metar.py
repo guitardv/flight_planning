@@ -20,10 +20,14 @@
 #       https://github.com/guitardv/flight_planning/blob/main/README.md
 ##############################################################################
 
-# version 1.3.4
-# import metar from designated airports (default: CYHU) and print them in the standard output
+# version 1.3.5
+# import metar from designated airports (default: LFMT) and print them in the standard output
 
 # changes
+# v 1.3.5
+# As of September 25 2025, aviationweather.gov's API went back to sending metar reports grouped by icao and accompanied by only the latest taf.
+# Query parameter "order" was not restored, so the sorting block of code writen for v1.3.4 is kept but the rest is essentially rolled back.
+# Changed default airport to LFMT.
 # v 1.3.4
 # As of September 2025, aviationweather.gov changed API. The new one restore support of decimals for the "hours" parameter, is querried at a slightly different address, and for each airfield id returns as many METAR/SPECI + TAF pairs as their are METARS/SPECI fitting the "hours" parameter instead of all the METARS/SPECI followed by the latest TAF. Query parameter "order" was removed, when the script query multiple stations reports are now sorted by time in the API answer.
 # ageOfEarliestMetarMessageToBeReported is a float again and is restored to its previous default value of 3.12
@@ -54,7 +58,7 @@ from urllib.request import urlopen
 from os.path import exists
 from datetime import datetime, timezone
 
-DefaultAirport = "CYHU".upper()
+DefaultAirport = "LFMT".upper()
 includeTAF = "true"
 # the .12 is added because otherwise the metar from ageOfEarliestMetarMessageToBeReported hours ago is removed before the new one is published
 ageOfEarliestMetarMessageToBeReported = "3.12"
@@ -164,36 +168,50 @@ while(udvLooped):
     # Add an indentation before all METAR/SPECI messages
 
 
-# block commented on v1.3.4
-# it worked when the metar tafs were sorted by startion and only the most recent taf was sent but not with the new api
-#    stationQt = len(stationICAOlist)
-#    headerLinesToAdd = []
-#    emptyLineNumber = 0
-#    # the range start at 8 because the last line inserted is number 7
-#    for i in range(8,len(metarWebPageText)):
-#        if(metarWebPageText[i] == ''):
-#            emptyLineNumber = emptyLineNumber + 1
-#            if(emptyLineNumber == 2):
-#                # if after the metar/taf of one station
-#                emptyLineNumber = 0
-#                headerLinesToAdd.insert(0,i)
-#                stationQt = stationQt - 1
-#            elif(stationQt <= 1 and emptyLineNumber == 1):
-#                # if after the last metar/speci but before the last taf
-#                break
-#        else:
-#            if(emptyLineNumber == 0):
-#                # if current line is a metar/speci message
-#                metarWebPageText[i] = "  " + metarWebPageText[i]
-#    del stationQt
-#    del emptyLineNumber
-#    if(len(headerLinesToAdd) > 0):
-#        # If there's more than one stations in the report, add the "METAR/SPECI <ICAO>" header above all metar/speci message groups
-#        for i in range(len(headerLinesToAdd)):
-#            metarWebPageText.insert(headerLinesToAdd[i]+1,"METAR/SPECI " + stationICAOlist[-(i+1)])
-#    del headerLinesToAdd
+    # block commented on v1.3.4
+    # it worked when returnedICAO = []the metar tafs were sorted by station and only the most recent taf was sent but not with the new api
+    # and uncommented on v1.3.5 when the api started sending metar tafs sorted by station with only the most recent taf again
+    stationQt = len(stationICAOlist)
+    returnedICAO = []
+    currentICAO = ""
+    headerLinesToAdd = []
+    emptyLineNumber = 0
+    reportBodyStart = 7
+    # the range start at 7 because the last line inserted is number 6
+    for i in range(reportBodyStart,len(metarWebPageText)):
+        if(metarWebPageText[i] == ''):
+            emptyLineNumber = emptyLineNumber + 1
+            if(emptyLineNumber == 2):
+                # if after the metar/taf of one station
+                emptyLineNumber = 0
+                currentICAO = ""
+            elif(stationQt < 1 and emptyLineNumber == 1):
+                # if after the last metar/speci but before the last taf
+                break
+        else:
+            if(emptyLineNumber == 0):
+                # if current line is a metar/speci message
+                metarWebPageText[i] = "  " + metarWebPageText[i]
+                # if the METAR/SPECI header hasn't been added yet
+                if(currentICAO == ""):
+                    headerLinesToAdd.insert(0,i)
+                    currentICAO = metarWebPageText[i].split()[1]
+                    returnedICAO.insert(len(returnedICAO),currentICAO)
+                    stationQt = stationQt - 1
 
+                
+    currentICAO = ""
+    del stationQt
+    del emptyLineNumber
+    if(len(headerLinesToAdd) > 0):
+        # If there's more than one stations in the report, add the "METAR/SPECI <ICAO>" header above all metar/speci message groups
+        for i in range(len(headerLinesToAdd)):
+            metarWebPageText.insert(headerLinesToAdd[i],"METAR/SPECI " + list(reversed(returnedICAO))[i])
+    del headerLinesToAdd
 
+    # block commented with v1.3.5
+    # the api went back to sending the metar taf sorted by station with only the most recent taf so I don't need all that anymore
+    """
     stationQt = len(stationICAOlist)
     currentICAO = ""
     metarParserState = 0
@@ -257,17 +275,21 @@ while(udvLooped):
             break
     del metarParserState
     del stationQt
+    """
 
 
     # sorting
-    
+
+    # block commented with v1.3.5
+    # I'm already doing that in the block uncommented with this version
+    """
     returnedICAO = []
     for i in range(reportBodyStart,len(metarWebPageText)):
         # establishing the list of ICAO returned by the API and their order
         if(metarWebPageText[i] != ''):
             if(metarWebPageText[i].split()[0] == "METAR/SPECI"):
                 returnedICAO.insert(len(returnedICAO),metarWebPageText[i].split()[1])
-
+    """
 
     if(returnedICAO != stationICAOlist):
 
@@ -387,7 +409,7 @@ while(udvLooped):
     del currentICAO
     del reportBodyStart
     del returnedICAO
-
+    
     # footer
     metarWebPageText.insert(len(metarWebPageText),'')
     metarWebPageText.insert(len(metarWebPageText),"Weather data provided by the US Aviation Weather Center")
