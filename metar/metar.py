@@ -20,10 +20,14 @@
 #       https://github.com/guitardv/flight_planning/blob/main/README.md
 ##############################################################################
 
-# version 1.3.5
+# version 1.3.6
 # import metar from designated airports (default: LFMT) and print them in the standard output
 
 # changes
+# v 1.3.6
+# Fix of a bug where sorting a metar/taf bloc downward to the bottom of the report resulted in writing it above the last line of the last taf.
+# It was because the sorting script assumed there was always an empty line after all TAFs and wrote the moved bloc above it, but that wasn't the case for the last one.
+# Fixed by adding an empty line at the bottom of the report if sorting is needed. That line is then part of the formated report's footer.
 # v 1.3.5
 # As of September 25 2025, aviationweather.gov's API went back to sending metar reports grouped by icao and accompanied by only the latest taf.
 # Query parameter "order" was not restored, so the sorting block of code writen for v1.3.4 is kept but the rest is essentially rolled back.
@@ -290,7 +294,7 @@ while(udvLooped):
             if(metarWebPageText[i].split()[0] == "METAR/SPECI"):
                 returnedICAO.insert(len(returnedICAO),metarWebPageText[i].split()[1])
     """
-
+    
     if(returnedICAO != stationICAOlist):
 
         if(len(returnedICAO) < len(stationICAOlist)):
@@ -319,7 +323,8 @@ while(udvLooped):
                         break
             # if currentUnsortedOrder isn't sorted in ascendent numbers, then the metar/taf blocks need to be sorted
             if(all(currentUnsortedOrder[c] <= currentUnsortedOrder[c+1] for c in range(len(currentUnsortedOrder) - 1)) == False):
-
+                # adding an empty line after the last taf so that every metar/taf block have an empty line after them, it's simpler to sort that way
+                metarWebPageText.append('')
                 numberOfStationsSorted = 1
                 # the sorting is looped until a full loop either sort as many metar/taf as their is ICAO pair matchings between the query and the answer or until a full loop complete without having to change the order of anything
                 # it's because, curently, if say the blocks are in the order 2,3,1 the first for will do:
@@ -365,13 +370,13 @@ while(udvLooped):
                                             if(emptyLinesCounted == (ICAOstationPosition+1)*2):
                                                 lineToMoveTheStationTo = textLineCount + 1
                                                 break
-                                    emptyLinesCounted = 0
+                                        emptyLinesCounted = 0
                                     # counting the number of lines in the metar/taf block
                                     for n in range(i,len(metarWebPageText)):
                                         if(metarWebPageText[n] == ''):
                                             emptyLinesCounted = emptyLinesCounted + 1
-                                        if(emptyLinesCounted == 2):
-                                            break
+                                            if(emptyLinesCounted == 2):
+                                                break
                                         linesToMove = linesToMove + 1
                                     del emptyLinesCounted
                                     # if the station is supposed to be higher than it is, move it up
@@ -384,7 +389,7 @@ while(udvLooped):
                                             del metarWebPageText[i+linesToMove]
                                     # if the station is supposed to be lower than it is, move it down
                                     else:
-                                        # there's an empty line under every TAF even the last one, it means lineToMoveTheStationTo point to just under an empty line under a taf
+                                        # there's an empty line under every TAF even the last one (because I added it at the begining of the sorting to simplify things), it means lineToMoveTheStationTo point to just under an empty line under a taf
                                         # if I don't change it, it will create a double blank line above and no blank line under the block
                                         lineToMoveTheStationTo = lineToMoveTheStationTo - 1
                                         # moving first the empty line bellow the notam/taf block, it will end up above the block
@@ -411,7 +416,9 @@ while(udvLooped):
     del returnedICAO
     
     # footer
-    metarWebPageText.insert(len(metarWebPageText),'')
+    # If I haven't already added an empty line at the end during sorting, do it now
+    if(metarWebPageText[len(metarWebPageText)-1] != ''):
+        metarWebPageText.insert(len(metarWebPageText),'')
     metarWebPageText.insert(len(metarWebPageText),"Weather data provided by the US Aviation Weather Center")
 
 
